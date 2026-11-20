@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -25,10 +26,25 @@ def health():
 @app.post("/items/{item_id}")
 def create_item(item_id: int, item: Item):
     items[item_id] = item
-    return {"item_id": item_id, "name": item.name, "price": item.price}
+    return {
+        "item_id": item_id,
+        "name": item.name,
+        "price": item.price
+    }
 
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int):
+    if item_id not in items:
+        raise HTTPException(
+            status_code=404,
+            detail="Item not found"
+        )
+
     item = items[item_id]
-    return {"item_id": item_id, "name": item.name, "price": item.price}
+
+    return {
+        "item_id": item_id,
+        "name": item.name,
+        "price": item.price
+    }
